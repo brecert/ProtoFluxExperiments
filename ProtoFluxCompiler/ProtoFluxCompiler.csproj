@@ -4,6 +4,40 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DotNetUtils\DotNetUtils.csproj" />
+    <ProjectReference Include="..\ProtoFluxUtils\ProtoFluxUtils.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ResonitePath>D:\Program Files (x86)\Steam\steamapps\common\Resonite\</ResonitePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ResoniteReference Include="Elements.Core" />
+    <ResoniteReference Include="ProtoFlux.Core" />
+    <ResoniteReference Include="ProtoFlux.Nodes.Core" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ResoniteAssemblyPath>$(ResonitePath)/Resonite_Data/Managed</ResoniteAssemblyPath>
+    <ReferencePath>$(ResoniteAssemblyPath);$(ReferencePath)</ReferencePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="@(ResoniteReference)">
+      <Name>%(ResoniteReference.Identity)</Name>
+      <HintPath Condition="Exists('$(ResoniteAssemblyPath)/%(Identity).dll')">$(ResoniteAssemblyPath)/%(Identity).dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="HarmonyLib">
+      <HintPath>$(ResonitePath)rml_libs/0Harmony.dll</HintPath>
+      <HintPath Condition="Exists('$(ResonitePath)0Harmony.dll')">$(ResonitePath)0Harmony.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

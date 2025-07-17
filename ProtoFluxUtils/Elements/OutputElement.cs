@@ -2,15 +2,15 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxUtils.Elements;
 
-public readonly struct OutputElement(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
+public record OutputElement(INode Node, int ElementIndex, int? ElementListIndex = null) : IElementIndex
 {
-  public readonly INode OwnerNode = node;
+  public readonly INode OwnerNode = Node;
 
-  public readonly int ElementIndex = elementIndex;
+  public readonly int ElementIndex = ElementIndex;
 
-  public readonly int? ElementListIndex = elementListIndex;
+  public readonly int? ElementListIndex = ElementListIndex;
 
-  public readonly IOutput? Target
+  public IOutput? Target
   {
     get => OwnerNode.GetOutput(ElementIndex);
   }
@@ -20,14 +20,14 @@ public readonly struct OutputElement(INode node, int elementIndex, int? elementL
       ? OwnerNode.GetOutputList(listIndex).GetOutput(ElementIndex)
       : OwnerNode.GetOutput(ElementIndex);
 
-  public readonly string DisplayName =>
+  public string DisplayName =>
     ElementListIndex is int listIndex
       ? $"{OwnerNode.GetOutputListName(listIndex)}[{ElementIndex}]"
       : OwnerNode.GetOutputName(ElementIndex);
 
-  public readonly DataClass DataClass => OwnerNode.GetOutputTypeClass(ElementIndex);
+  public DataClass DataClass => OwnerNode.GetOutputTypeClass(ElementIndex);
 
-  public readonly Type ValueType => OwnerNode.GetOutputType(ElementIndex);
+  public Type ValueType => OwnerNode.GetOutputType(ElementIndex);
 
   int IElementIndex.ElementIndex => ElementIndex;
 

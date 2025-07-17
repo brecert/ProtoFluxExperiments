@@ -63,7 +63,7 @@ public static partial class NodeExtensions
   {
     for (int i = 0; i < node.FixedOutputCount; i++)
     {
-      yield return new(node, elementIndex: i);
+      yield return new(node, ElementIndex: i);
     }
 
     for (int i = 0; i < node.DynamicOutputCount; i++)
@@ -71,7 +71,7 @@ public static partial class NodeExtensions
       var list = node.GetInputList(i);
       for (int j = 0; j < list.Count; j++)
       {
-        yield return new(node, elementIndex: j, elementListIndex: i);
+        yield return new(node, ElementIndex: j, ElementListIndex: i);
       }
     }
   }
@@ -93,14 +93,32 @@ public static partial class NodeExtensions
       }
     }
   }
-
-  public static IEnumerable<ReferenceElement> AllReferenceElements(this INode node)
+  
+  public static IEnumerable<OperationElement> AllOperationElements(this INode node)
   {
-    for (int i = 0; i < node.FixedReferenceCount; i++)
+    for (int i = 0; i < node.FixedOperationCount; i++)
     {
       yield return new(node, i);
     }
+
+    for (int i = 0; i < node.DynamicOperationCount; i++)
+    {
+      var list = node.GetOperationList(i);
+      for (int j = 0; j < list.Count; j++)
+      {
+        yield return new(node, j, i);
+      }
+    }
   }
+
+
+  public static IEnumerable<ReferenceElement> AllReferenceElements(this INode node)
+    {
+        for (int i = 0; i < node.FixedReferenceCount; i++)
+        {
+            yield return new(node, i);
+        }
+    }
 
   public static IEnumerable<GlobalRefElement> AllGlobalRefElements(this INode node)
   {

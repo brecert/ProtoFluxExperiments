@@ -2,7 +2,7 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxUtils.Elements;
 
-public readonly struct OperationElement(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
+public record OperationElement(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
 {
   public readonly INode OwnerNode = node;
 
@@ -10,7 +10,7 @@ public readonly struct OperationElement(INode node, int elementIndex, int? eleme
 
   public readonly int? ElementListIndex = elementListIndex;
 
-  public readonly IOperation? Target
+  public IOperation? Target
   {
     get => GetOperation();
   }
@@ -20,10 +20,10 @@ public readonly struct OperationElement(INode node, int elementIndex, int? eleme
         ? OwnerNode.GetOperationList(listIndex).GetOperation(ElementIndex)
         : OwnerNode.GetOperation(ElementIndex);
 
-  public readonly string DisplayName =>
+  public string DisplayName =>
     ElementListIndex is int listIndex
       ? $"{OwnerNode.GetOperationName(listIndex)}[{ElementIndex}]"
-      : OwnerNode.GetInputName(ElementIndex);
+      : OwnerNode.GetOperationName(ElementIndex);
 
 
   int IElementIndex.ElementIndex => ElementIndex;

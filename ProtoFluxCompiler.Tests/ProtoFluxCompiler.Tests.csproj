@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableMSTestRunner>true</EnableMSTestRunner>
+    <OutputType>Exe</OutputType>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <!--
+      Displays error on console in addition to the log file. Note that this feature comes with a
+    performance impact.
+      For more information, visit
+    https://learn.microsoft.com/dotnet/core/testing/unit-testing-platform-integration-dotnet-test#show-failure-per-test
+      -->
+    <TestingPlatformShowTestsFailure>true</TestingPlatformShowTestsFailure>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MSTest" Version="3.9.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="17.14.2" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="1.7.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProtoFluxCompiler\ProtoFluxCompiler.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+  </ItemGroup>
+
+  <!--  -->
+
+  <PropertyGroup>
+    <ResonitePath>D:\Program Files (x86)\Steam\steamapps\common\Resonite\</ResonitePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ResoniteReference Include="Elements.Core" />
+    <ResoniteReference Include="ProtoFlux.Core" />
+    <ResoniteReference Include="ProtoFlux.Nodes.Core" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <ResoniteAssemblyPath>$(ResonitePath)/Resonite_Data/Managed</ResoniteAssemblyPath>
+    <ReferencePath>$(ResoniteAssemblyPath);$(ReferencePath)</ReferencePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="@(ResoniteReference)">
+      <Name>%(ResoniteReference.Identity)</Name>
+      <HintPath Condition="Exists('$(ResoniteAssemblyPath)/%(Identity).dll')">$(ResoniteAssemblyPath)/%(Identity).dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
