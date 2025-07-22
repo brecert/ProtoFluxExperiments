@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Text;
 using Elements.Core;
 using HarmonyLib;
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution;
+using ProtoFlux.Runtimes.Execution.Nodes;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ProtoFluxCompiler.Collections;
 using ProtoFluxUtils.Elements;
@@ -15,6 +17,13 @@ namespace ProtoFluxCompiler.Compiler;
 
 public static class Reflow
 {
+    /// <summary>
+    /// Builds a linear sequence of outputs from the node's inputs
+    /// (c = a + b; d = a + c;) -> [a; b; c; d]
+    /// </summary>
+    /// <typeparam name="C"></typeparam>
+    /// <param name="node"></param>
+    /// <param name="set"></param>
     public static void BuildSequence<C>(INode node, in OrderedPushSet<OutputElement> set) where C : ExecutionContext
     {
         foreach (var input in node.AllInputElements())
@@ -26,6 +35,12 @@ public static class Reflow
     }
 
 
+    /// <summary>
+    /// Builds a linear sequence of outputs that feed into this output
+    /// </summary>
+    /// <typeparam name="C"></typeparam>
+    /// <param name="outputElement"></param>
+    /// <param name="set"></param>
     public static void BuildSequence<C>(OutputElement outputElement, in OrderedPushSet<OutputElement> set) where C : ExecutionContext
     {
         set.Add(outputElement);
@@ -65,11 +80,11 @@ public static class Reflow
         return operationMap;
     }
 
+
     public static string TextRepresentation<C>(NodeGroup group) where C : ExecutionContext
     {
         var builder = new StringBuilder();
         var table = BuildFlowTable<C>(group);
-        var query = new NodeQueryAcceleration(group);
 
         foreach (var (opIndex, (op, seq)) in table.Index())
         {

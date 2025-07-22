@@ -1,15 +1,17 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace DotNetUtils.Extensions;
 
 public static class TypeExtensions
 {
-  public static bool TryGetGenericTypeDefinition(this Type type, out Type? genericTypeDefinition)
-  {
-    if (type.IsGenericType)
+    public static bool TryGetGenericTypeDefinition(this Type type, [NotNullWhen(true)] out Type? genericTypeDefinition)
     {
-      genericTypeDefinition = type.GetGenericTypeDefinition();
-      return true;
+        if (type.IsGenericType)
+        {
+            genericTypeDefinition = type.GetGenericTypeDefinition();
+            return true;
+        }
+        genericTypeDefinition = null;
+        return false;
     }
-    genericTypeDefinition = null;
-    return false;
-  }
 }

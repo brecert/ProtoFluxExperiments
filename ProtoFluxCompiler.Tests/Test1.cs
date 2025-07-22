@@ -21,9 +21,9 @@ public sealed class Test1
     [TestMethod]
     public void TestMethod1()
     {
-        var group = BibleMarkGroup();
-        Reflow.BuildFlowTable<C>(group);
-        Debug.WriteLine(Reflow.TextRepresentation<C>(group));
+        var group = ValueAddGroup();
+        // Reflow.BuildFlowTable<C>(group);
+        // Debug.WriteLine(Reflow.RemapGroup<C>(group).ToString());
     }
 
     static NodeGroup ValueAddGroup()
@@ -36,10 +36,15 @@ public sealed class Test1
         var b = runtime.AddNode<ValueConstant<int>>();
         var add = runtime.AddNode<ValueAdd<int>>();
         var write = runtime.AddNode<ValueWrite<int>>();
+        var store = runtime.AddNode<LocalValue<int>>();
+        a.Value = 3;
+        b.Value = 4;
+
         call.Target.Target = write;
         add.A.Source = a;
         add.B.Source = b;
         write.Value.Source = add;
+        write.Variable.Target = store;
 
         runtime.Rebuild();
         return group;
