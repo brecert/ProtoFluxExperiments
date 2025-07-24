@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using Elements.Core;
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution;
 using ProtoFlux.Runtimes.Execution.Nodes;
@@ -22,8 +23,20 @@ public sealed class Test1
     public void TestMethod1()
     {
         var group = ValueAddGroup();
-        var compiled = NodeGroupCompiler.Compile(group);
-        compiled();
+        var compile = NodeGroupCompiler.Compile(group);
+        compile((a, b) =>
+        {
+            var A = (Nodes.ExternalCall<C>)a;
+            var B = (Nodes.LocalValue<int>)b;
+            Debug.WriteLine(A);
+            Debug.WriteLine(B);
+            A.Execute();
+            Debug.WriteLine(B.Value());
+        });
+        // var (call, local) = compile();
+        // Debug.WriteLine(local.Read());
+        // call.Execute();
+        // Debug.WriteLine(local.Read());
 
         // Reflow.BuildFlowTable<C>(group);
         // Debug.WriteLine(Reflow.RemapGroup<C>(group).ToString());
@@ -35,19 +48,19 @@ public sealed class Test1
         var runtime = group.AddRuntime<R>();
 
         var call = runtime.AddNode<ExternalCall<C>>();
-        // var a = runtime.AddNode<ValueConstant<int>>();
-        // var b = runtime.AddNode<ValueConstant<int>>();
-        // var add = runtime.AddNode<ValueAdd<int>>();
-        // var write = runtime.AddNode<ValueWrite<int>>();
-        // var store = runtime.AddNode<LocalValue<int>>();
-        // a.Value = 3;
-        // b.Value = 4;
+        var a = runtime.AddNode<ValueConstant<int>>();
+        var b = runtime.AddNode<ValueConstant<int>>();
+        var add = runtime.AddNode<ValueAdd<int>>();
+        var write = runtime.AddNode<ValueWrite<int>>();
+        var store = runtime.AddNode<LocalValue<int>>();
+        a.Value = 3;
+        b.Value = 4;
 
-        // call.Target.Target = write;
-        // add.A.Source = a;
-        // add.B.Source = b;
-        // write.Value.Source = add;
-        // write.Variable.Target = store;
+        call.Target.Target = write;
+        add.A.Source = a;
+        add.B.Source = b;
+        write.Value.Source = add;
+        write.Variable.Target = store;
 
         runtime.Rebuild();
         return group;

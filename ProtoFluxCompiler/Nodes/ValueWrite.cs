@@ -17,6 +17,7 @@ public sealed class ValueWrite<T> : INode where T : unmanaged
     public Impulse? OnFail;
 
     [Operation]
+    [ProtoFluxName("*")]
     public void Run(
         [Input] T Value
     )

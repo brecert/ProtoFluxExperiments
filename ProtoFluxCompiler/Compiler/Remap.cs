@@ -16,12 +16,9 @@ public class NodeRemapper
 
     public static Type RemapType(Type nodeType)
     {
-        Debug.WriteLine(nodeType);
         if (nodeType.TryGetGenericTypeDefinition(out var genericTypeDefinition))
         {
-            Debug.WriteLine(genericTypeDefinition);
             var genericArguments = nodeType.GenericTypeArguments;
-            Debug.WriteLine(genericArguments.Length);
             return TypeMap[genericTypeDefinition].MakeGenericType(genericArguments);
         }
         else

@@ -2,14 +2,9 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxUtils.Elements;
 
-public readonly struct InputElement(INode owner, int index, int? listIndex = null) : IElementIndex
+public record InputElement(INode OwnerNode, int ElementIndex, int? ElementListIndex = null) : IElementIndex
 {
-  public readonly INode OwnerNode = owner;
-
-  public readonly int ElementIndex = index;
-  public readonly int? ElementListIndex = listIndex;
-
-  public readonly IOutput? Source
+  public IOutput? Source
   {
     get => GetInputSource();
     set => SetInputSource(value);
@@ -46,12 +41,12 @@ public readonly struct InputElement(INode owner, int index, int? listIndex = nul
     }
   }
 
-  public readonly string DisplayName =>
+  public string DisplayName =>
     ElementListIndex is int listIndex
       ? $"{OwnerNode.GetInputListName(listIndex)}[{ElementIndex}]"
       : OwnerNode.GetInputName(ElementIndex);
 
-  public readonly Type ValueType => OwnerNode.GetInputType(ElementIndex);
+  public Type ValueType => OwnerNode.GetInputType(ElementIndex);
 
   int IElementIndex.ElementIndex => ElementIndex;
 

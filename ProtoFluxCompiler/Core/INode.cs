@@ -1,3 +1,3 @@
 namespace ProtoFluxCompiler.Core;
 
-interface INode;
+public interface INode;

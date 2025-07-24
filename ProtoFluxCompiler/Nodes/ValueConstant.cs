@@ -7,6 +7,8 @@ namespace ProtoFluxCompiler.Nodes;
 [Node]
 public sealed class ValueConstant<T> : INode where T : unmanaged
 {
+    [Constant]
+    [ProtoFluxName("Value")]
     public T value = default;
 
     public ValueConstant() { }

@@ -1,10 +1,15 @@
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
+using DotNext.Linq.Expressions;
+using DotNext.Threading;
+using ExpressionToCodeLib;
 using ProtoFlux.Core;
 using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ProtoFluxCompiler.Attributes;
 using ProtoFluxUtils.Elements;
 using ProtoFluxUtils.Extensions;
+using static DotNext.Metaprogramming.CodeGenerator;
 
 namespace ProtoFluxCompiler.Compiler;
 
@@ -15,8 +20,14 @@ public class NodeGroupCompiler
     readonly NodeGroup nodeGroup;
     readonly INode[] nodes;
 
-    readonly Dictionary<INode, NodeInstance> instanceMap = [];
+    readonly Dictionary<INode, ParameterExpression> instanceMap = [];
     readonly Dictionary<OperationElement, ParameterExpression> operationMap = [];
+
+    static T Debug<T>(T any) where T : Expression
+    {
+        System.Diagnostics.Debug.WriteLine(ExpressionToCode.ToCode(any));
+        return any;
+    }
 
     NodeGroupCompiler(NodeGroup nodeGroup)
     {
@@ -28,80 +39,132 @@ public class NodeGroupCompiler
         this.nodeGroup = nodeGroup;
     }
 
-    public static Action Compile(NodeGroup nodeGroup) =>
-        (Action)new NodeGroupCompiler(nodeGroup).Compile().Compile();
+    public static Action<Action<Core.INode, Core.INode>> Compile(NodeGroup nodeGroup) =>
+        Debug(new NodeGroupCompiler(nodeGroup).Compile()).Compile();
 
-    LambdaExpression Compile()
+    Expression<Action<Action<Core.INode, Core.INode>>> Compile()
     {
-        var instances = CreateInstances();
-        var references = AssignReferences();
-        var blocks = CreateBlocks();
-        var impulses = AssignImpulses();
+        // var instances = CreateInstances();
+        // var references = AssignReferences();
+        // var blocks = CreateBlocks();
+        // var impulses = AssignImpulses();
 
-        var combined = Expression.Block([
-            ..instances,
-            // ..references,
-            // ..blocks,
-            // ..impulses
-        ]);
+        // // var combined = Expression.Block([
+        // //     ..instances,
+        // //     // ..references,
+        // //     // ..blocks,
+        // //     // ..impulses
+        // // ]);
 
-        return Expression.Lambda(combined);
+        // return Expression.Lambda(combined);
+
+        return Lambda<Action<Action<Core.INode, Core.INode>>>(fun =>
+        {
+            CreateInstances();
+            AssignReferences();
+            CreateBlocks();
+            AssignImpulses();
+
+            Invoke(fun[0], [instanceMap.First().Value, instanceMap.Last().Value]);
+        });
     }
 
 
-    IEnumerable<Expression> CreateInstances()
+    void CreateInstances()
     {
         foreach (var (i, node) in nodes.Index())
         {
             var newNodeType = NodeRemapper.RemapType(node.GetType());
-            var variable = Expression.Variable(newNodeType, $"n{i} {node.GetType().Name}");
-            var expression = Expression.Assign(
+            var variable = DeclareVariable(newNodeType, $"n{i}");
+            Assign(
                 variable,
-                Expression.New(newNodeType)
+                newNodeType.New()
             );
-            instanceMap.Add(node, new(variable, expression));
-            yield return expression;
-        }
-    }
+            instanceMap.Add(node, variable);
 
-    IEnumerable<Expression> AssignReferences()
-    {
-        foreach (var node in nodes)
-        {
-            var (variable, _) = instanceMap[node];
-            // TODO: get references by attribute
-            foreach (var reference in node.AllReferenceElements())
+            foreach (var intoField in newNodeType.GetFields())
             {
-                if (reference.Target == null) continue;
-                var targetReference = instanceMap[reference.Target].Variable;
-                var member = variable.Type.GetMember(reference.DisplayName)[0];
-                var memberAccess = Expression.MakeMemberAccess(variable, member);
-                yield return Expression.Assign(memberAccess, targetReference);
+                if (intoField.GetCustomAttribute<ConstantAttribute>() is null) continue;
+                var name = ProtoFluxName(intoField);
+                var fromField = node.GetType().GetField(name)
+                    ?? throw new Exception($"Invalid ProtoFlux constant field mapping for '{name}'");
+                Assign(
+                    Expression.MakeMemberAccess(variable, intoField),
+                    Expression.Constant(fromField.GetValue(node))
+                );
+                // WriteLine(Expression.MakeMemberAccess(variable, intoField));
+                // WriteLine(Expression.Constant(fromField.GetValue(node)));
             }
         }
     }
 
-    IEnumerable<Expression> CreateBlocks()
+    void AssignReferences()
     {
-        var table = Reflow.BuildFlowTable(nodeGroup);
-
-        foreach (var (operation, sequence) in table)
+        foreach (var node in nodes)
         {
-            var variable = Expression.Variable(typeof(Action), operation.DisplayName);
-            operationMap[operation] = variable;
-
-            yield return Expression.Assign(
-                variable,
-                Expression.Lambda<Action>(Expression.Block(BuildSequence(sequence)))
-            );
+            var variable = instanceMap[node];
+            // TODO: get references by attribute
+            foreach (var reference in node.AllReferenceElements())
+            {
+                if (reference.Target == null) continue;
+                var targetReference = instanceMap[reference.Target];
+                var member = variable.Type.GetMember(reference.DisplayName)[0];
+                var memberAccess = Expression.MakeMemberAccess(variable, member);
+                Assign(memberAccess, targetReference);
+            }
         }
     }
 
-    private IEnumerable<Expression> BuildSequence(Collections.OrderedPushSet<OutputElement> sequence)
+    void CreateBlocks()
     {
-        var outputMap = new Dictionary<OutputElement, Expression>();
+        var table = Reflow.BuildFlowTable(nodeGroup);
 
-        foreach (var output in sequence)
+        foreach (var (i, (operation, sequence)) in table.Index())
+        {
+            var outputMap = new Dictionary<OutputElement, Expression>();
+
+            var variable = DeclareVariable<Action>($"b{i}");
+            operationMap[operation] = variable;
+
+            Assign(
+                variable,
+                Lambda<Action>(fun =>
+                {
+                    BuildSequence(sequence, outputMap);
+                    
+                    // Finally we "jump" to the next operation by calling the operation
+                    var node = instanceMap[operation.OwnerNode];
+                    var operationMember = GetOperationByName(node.Type, operation.DisplayName);
+                    var parameters = MapInputParameters(operation, outputMap, node, operationMember);
+                    Call(node, operationMember, parameters);
+                })
+            );
+        }
+
+        static IEnumerable<Expression> MapInputParameters(OperationElement operation, Dictionary<OutputElement, Expression> outputMap, ParameterExpression node, MethodInfo operationMember)
+        {
+            foreach (var parameterInfo in operationMember.GetParameters())
+            {
+                var name = ProtoFluxName(parameterInfo) ?? throw new Exception($"No input name found for input on {node}");
+                var inputElement = operation.OwnerNode.GetInputElementByName(name);
+                if (inputElement?.SourceElement() is var sourceOutput and not null)
+                {
+                    var outputVarExpr = outputMap[sourceOutput];
+                    yield return outputVarExpr;
+                }
+                else
+                {
+                    throw new Exception("default inputs are not supported yet");
+                }
+            }
+        }
+    }
+
+    private void BuildSequence(Collections.OrderedPushSet<OutputElement> sequence, Dictionary<OutputElement, Expression> outputMap)
+    {
+        // var outputMap = new Dictionary<OutputElement, Expression>();
+
+        foreach (var (i, output) in sequence.Index())
         {
             if (output.Target == null)
             {
@@ -109,26 +172,26 @@ public class NodeGroupCompiler
             }
 
             // TODO: get outputs by attribute
-            var (owner, _) = instanceMap[output.OwnerNode];
+            var owner = instanceMap[output.OwnerNode];
             var method = GetMethodByName(owner.Type, output.DisplayName);
 
             // TODO: use attributes/metadata for Default
             var inputs = output.OwnerNode.AllInputElements()
                 .Select(i => i.SourceElement() is var el and not null ? outputMap[el] : Expression.Default(i.ValueType));
 
-            var variable = Expression.Variable(method.ReturnType, method.Name);
+            var variable = DeclareVariable(method.ReturnType, $"o{i}");
             outputMap[output] = variable;
 
-            yield return Expression.Assign(
+            Assign(
                 variable,
                 Expression.Call(owner, method, inputs)
             );
         }
     }
 
-    IEnumerable<Expression> AssignImpulses()
+    void AssignImpulses()
     {
-        foreach (var (node, (mappedNodeVariable, _)) in instanceMap)
+        foreach (var (node, mappedNodeVariable) in instanceMap)
         {
             foreach (var impulseElement in node.AllImpulseElements())
             {
@@ -138,7 +201,7 @@ public class NodeGroupCompiler
 
                 var impulseMember = GetMemberByName(mappedNodeVariable.Type, impulseElement.DisplayName);
 
-                yield return Expression.Assign(
+                Assign(
                     Expression.MakeMemberAccess(mappedNodeVariable, impulseMember),
                     operationMap[targetOperation]
                 );
@@ -155,5 +218,18 @@ public class NodeGroupCompiler
         type.GetMembers()
             .FirstOrDefault(m => (m.GetCustomAttribute<ProtoFluxNameAttribute>()?.Name ?? m.Name) == name)
             ?? throw new Exception($"Unable to find method '{name}' by name for '{type}'");
+
+    static MethodInfo GetOperationByName(Type type, string name) =>
+        type.GetMethods()
+            .Where(m => m.GetCustomAttribute<OperationAttribute>() != null)
+            .FirstOrDefault(m => ProtoFluxName(m) == name)
+            ?? throw new Exception($"Unable to find operation '{name}' by name for '{type}'");
+
+
+    static string ProtoFluxName(MemberInfo info) =>
+        info.GetCustomAttribute<ProtoFluxNameAttribute>()?.Name ?? info.Name;
+
+    static string? ProtoFluxName(ParameterInfo info) =>
+        info.GetCustomAttribute<ProtoFluxNameAttribute>()?.Name ?? info.Name;
 
 }

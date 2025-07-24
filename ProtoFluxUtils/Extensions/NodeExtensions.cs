@@ -46,7 +46,7 @@ public static partial class NodeExtensions
   {
     for (int i = 0; i < node.FixedInputCount; i++)
     {
-      yield return new(node, index: i);
+      yield return new(node, ElementIndex: i);
     }
 
     for (int i = 0; i < node.DynamicInputCount; i++)
@@ -54,7 +54,7 @@ public static partial class NodeExtensions
       var list = node.GetInputList(i);
       for (int j = 0; j < list.Count; j++)
       {
-        yield return new(node, index: j, listIndex: i);
+        yield return new(node, ElementIndex: j, ElementListIndex: i);
       }
     }
   }
@@ -175,16 +175,27 @@ public static partial class NodeExtensions
       node.GetOutputList(i).EnsureSize(from.GetOutputList(i).Count);
     }
   }
-
-  public static IOperation? GetOperationByName(this INode node, string name)
+  public static InputElement? GetInputElementByName(this INode node, string name)
   {
-    var meta = node.Metadata.GetOperationByName(name);
+    var meta = node.Metadata.GetInputByName(name);
     if (meta != null)
     {
-      return node.GetOperation(meta.Index);
+      return new(node, meta.Index);
     }
     return null;
   }
+
+  
+
+  public static IOperation? GetOperationByName(this INode node, string name)
+    {
+        var meta = node.Metadata.GetOperationByName(name);
+        if (meta != null)
+        {
+            return node.GetOperation(meta.Index);
+        }
+        return null;
+    }
 
   public static ImpulseElement GetImpulseByIndex(this INode node, int index) =>
     new(node, index);
