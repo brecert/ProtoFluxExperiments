@@ -30,7 +30,7 @@ namespace ProtoFluxCompiler.Nodes;
 
 
 [Node]
-public sealed class ExternalCall : INode
+public sealed class ExternalCall<_> : INode
 {
     [Impulse]
     public Impulse? Target;

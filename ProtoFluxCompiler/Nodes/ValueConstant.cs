@@ -5,9 +5,14 @@ using ProtoFluxCompiler.Core;
 namespace ProtoFluxCompiler.Nodes;
 
 [Node]
-public sealed class ValueConstant<T>(T value) : INode where T : unmanaged
+public sealed class ValueConstant<T> : INode where T : unmanaged
 {
-    // [Output]
-    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T Value = value;
+    public T value = default;
+
+    public ValueConstant() { }
+
+    [Output]
+    [ProtoFluxName("*")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public T Value() => value;
 }

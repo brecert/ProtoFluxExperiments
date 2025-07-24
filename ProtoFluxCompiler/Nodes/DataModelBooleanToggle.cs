@@ -7,7 +7,7 @@ using Impulse = Action;
 [Node]
 public sealed class DataModelBooleanToggle : INode
 {
-    bool value = default;
+    bool value = false;
 
     [Impulse]
     public Impulse? OnSet;

@@ -7,7 +7,7 @@ namespace ProtoFluxCompiler.Nodes;
 [Node]
 public sealed class ObjectConstant<T>(T value) : INode
 {
-    // [Output]
-    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Output]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Value() => value;
 }

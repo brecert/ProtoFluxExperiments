@@ -23,7 +23,7 @@ public sealed class ValueWrite<T> : INode where T : unmanaged
     {
         if (Variable != null && Variable.Write(Value))
         {
-            if(OnWritten != null) OnWritten();
+            OnWritten?.Invoke();
         }
         else
         {
@@ -31,3 +31,4 @@ public sealed class ValueWrite<T> : INode where T : unmanaged
         }
     }
 }
+

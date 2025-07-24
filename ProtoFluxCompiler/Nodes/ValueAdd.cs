@@ -10,6 +10,8 @@ namespace ProtoFluxCompiler.Nodes;
 public sealed class ValueAdd<T> : INode where T : unmanaged
 {
     [Output]
+    [ProtoFluxName("*")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Value(
         [Input] T A,
         [Input] T B

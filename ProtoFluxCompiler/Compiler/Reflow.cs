@@ -24,13 +24,13 @@ public static class Reflow
     /// <typeparam name="C"></typeparam>
     /// <param name="node"></param>
     /// <param name="set"></param>
-    public static void BuildSequence<C>(INode node, in OrderedPushSet<OutputElement> set) where C : ExecutionContext
+    public static void BuildSequence(INode node, in OrderedPushSet<OutputElement> set)
     {
         foreach (var input in node.AllInputElements())
         {
             var element = input.SourceElement();
             if (element == null) continue;
-            BuildSequence<C>(element, set);
+            BuildSequence(element, set);
         }
     }
 
@@ -41,7 +41,7 @@ public static class Reflow
     /// <typeparam name="C"></typeparam>
     /// <param name="outputElement"></param>
     /// <param name="set"></param>
-    public static void BuildSequence<C>(OutputElement outputElement, in OrderedPushSet<OutputElement> set) where C : ExecutionContext
+    public static void BuildSequence(OutputElement outputElement, in OrderedPushSet<OutputElement> set)
     {
         set.Add(outputElement);
         foreach (var output in outputElement.OwnerNode.AllInputElements())
@@ -49,12 +49,12 @@ public static class Reflow
             var element = output.SourceElement();
             if (element is not null)
             {
-                BuildSequence<C>(element, set);
+                BuildSequence(element, set);
             }
         }
     }
 
-    public static Dictionary<OperationElement, OrderedPushSet<OutputElement>> BuildFlowTable<C>(NodeGroup group) where C : ExecutionContext
+    public static Dictionary<OperationElement, OrderedPushSet<OutputElement>> BuildFlowTable(NodeGroup group)
     {
         var usedOperations = new HashSet<OperationElement>();
 
@@ -73,7 +73,7 @@ public static class Reflow
         foreach (var used in usedOperations)
         {
             var seq = new OrderedPushSet<OutputElement>();
-            BuildSequence<C>(used.OwnerNode, seq);
+            BuildSequence(used.OwnerNode, seq);
             operationMap[used] = seq;
         }
 
@@ -81,10 +81,10 @@ public static class Reflow
     }
 
 
-    public static string TextRepresentation<C>(NodeGroup group) where C : ExecutionContext
+    public static string TextRepresentation(NodeGroup group)
     {
         var builder = new StringBuilder();
-        var table = BuildFlowTable<C>(group);
+        var table = BuildFlowTable(group);
 
         foreach (var (opIndex, (op, seq)) in table.Index())
         {

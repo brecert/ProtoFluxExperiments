@@ -9,9 +9,9 @@ public sealed class LocalValue<T> : INode, IVariable<T> where T : unmanaged
 {
     private T value = default;
 
-    // [Output]
-    // [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T Value => value;
+    [Output]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public T Value() => value;
 
 
     public T Read() => value;

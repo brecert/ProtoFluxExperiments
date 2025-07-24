@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Elements.Core;
 using ProtoFluxCompiler.Nodes;
 
 namespace ProtoFluxCompiler.Tests;
@@ -29,11 +30,17 @@ public sealed class BibleMarkTesting
         bench();
     }
 
-    static Action CompiledBibleMark(string input)
+    public static Action CompiledBibleMark(string input)
     {
-        var n0 = new ExternalCall();
-        var n1 = new ValueConstant<ulong>(14695981039346656037UL);
-        var n2 = new ValueConstant<ulong>(1099511628211UL);
+        var n0 = new ExternalCall<dummy>();
+        var n1 = new ValueConstant<ulong>
+        {
+            value = 14695981039346656037UL
+        };
+        var n2 = new ValueConstant<ulong>
+        {
+            value = 1099511628211UL
+        };
         var n3 = new ObjectConstant<string>(input);
         var n4 = new StringLength();
         var n5 = new For();
@@ -60,14 +67,14 @@ public sealed class BibleMarkTesting
 
         void b1()
         {
-            var v0 = n1.Value;
+            var v0 = n1.Value();
             n11.Run(v0);
         }
 
         void b2()
         {
-            var v0 = n14.Value;
-            var v1 = n2.Value;
+            var v0 = n14.Value();
+            var v1 = n2.Value();
             var v2 = n8.Value(v0, v1);
             n12.Run(v2);
         }
@@ -79,7 +86,7 @@ public sealed class BibleMarkTesting
             var v2 = n6.Value(v0, v1);
             var v3 = n7.Value(v2);
             var v4 = n9.Value(v3);
-            var v5 = n14.Value;
+            var v5 = n14.Value();
             var v6 = n10.Value(v5, v4);
             n13.Run(v6);
         }
@@ -92,7 +99,7 @@ public sealed class BibleMarkTesting
         void Execute()
         {
             n0.Execute();
-            Console.WriteLine(n14.Value);
+            Console.WriteLine(n14.Value());
         }
 
         return Execute;
