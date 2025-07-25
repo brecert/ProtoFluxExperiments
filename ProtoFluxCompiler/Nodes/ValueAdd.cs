@@ -2,7 +2,6 @@ using System.Runtime.CompilerServices;
 using Elements.Core;
 using ProtoFluxCompiler.Attributes;
 using ProtoFluxCompiler.Core;
-using Impulse = System.Action;
 
 namespace ProtoFluxCompiler.Nodes;
 
@@ -22,6 +21,7 @@ public sealed class ValueAdd<T> : INode where T : unmanaged
 public sealed class StringLength : INode
 {
     [Output]
+    [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Value(
         [Input] string? A
@@ -32,13 +32,14 @@ public sealed class StringLength : INode
 public sealed class GetCharacter : INode
 {
     [Output]
+    [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public char Value(
-        [Input] string? str,
-        [Input] int index
+        [Input] string? Str,
+        [Input] int Index
     ) =>
-        str is not null && index >= 0 && index < str.Length
-            ? str[index]
+        Str is not null && Index >= 0 && Index < Str.Length
+            ? Str[Index]
             : '\0';
 }
 
@@ -46,59 +47,11 @@ public sealed class GetCharacter : INode
 public sealed class ToUTF16 : INode
 {
     [Output]
+    [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Value(
-        [Input] char character
-    ) => character;
-}
-
-
-[Node]
-public sealed class For : INode
-{
-    int index = 0;
-
-    [Impulse]
-    public Impulse? LoopStart;
-
-    [Impulse]
-    public Impulse? LoopIteration;
-
-    [Impulse]
-    public Impulse? LoopEnd;
-
-    [Operation]
-    public void Run(
-        [Input] int count,
-        [Input] bool reverse
-    )
-    {
-        LoopStart?.Invoke();
-        if (!reverse)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                index = i;
-                if(LoopIteration != null) LoopIteration();
-
-            }
-
-        }
-        else
-        {
-            for (int i = count - 1; i >= 0; i--)
-            {
-                index = i;
-                LoopIteration?.Invoke();
-            }
-        }
-        index = 0;
-        LoopEnd?.Invoke();
-    }
-
-    [Output]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int Index() => index;
+        [Input] char Character
+    ) => Character;
 }
 
 [Node]
@@ -108,6 +61,7 @@ public sealed class ValueMul<T> : INode where T : unmanaged
     static T GetDefaultOfB() => Coder<T>.Identity;
 
     [Output]
+    [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Value(
         [Input(@default: nameof(GetDefaultOfA))]
@@ -121,6 +75,7 @@ public sealed class ValueMul<T> : INode where T : unmanaged
 public sealed class Cast_int_To_ulong : INode
 {
     [Output]
+    [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong Value(
         [Input] int Input
@@ -131,9 +86,23 @@ public sealed class Cast_int_To_ulong : INode
 public sealed class XOR_Ulong : INode
 {
     [Output]
+    [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong Value(
         [Input] ulong A,
         [Input] ulong B
     ) => A ^ B;
 }
+
+[Node]
+public sealed class Unpack_Int2 : INode
+{
+    [Output]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int X([Input] int2 V) => V.x;
+
+    [Output]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int Y([Input] int2 V) => V.y;
+}
+

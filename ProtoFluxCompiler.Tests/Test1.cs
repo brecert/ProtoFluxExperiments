@@ -19,19 +19,18 @@ namespace ProtoFluxCompiler.Tests;
 public sealed class Test1
 {
 
-    [TestMethod]
+    [TestMethod]    
     public void TestMethod1()
     {
-        var group = ValueAddGroup();
+        var group = BibleMarkGroup();
         var compile = NodeGroupCompiler.Compile(group);
         compile((a, b) =>
         {
             var A = (Nodes.ExternalCall<C>)a;
-            var B = (Nodes.LocalValue<int>)b;
-            Debug.WriteLine(A);
-            Debug.WriteLine(B);
+            var B = (Nodes.LocalValue<ulong>)b;
             A.Execute();
-            Debug.WriteLine(B.Value());
+
+            Console.WriteLine(B.Read());
         });
         // var (call, local) = compile();
         // Debug.WriteLine(local.Read());
@@ -42,7 +41,7 @@ public sealed class Test1
         // Debug.WriteLine(Reflow.RemapGroup<C>(group).ToString());
     }
 
-    static NodeGroup ValueAddGroup()
+    public static NodeGroup ValueAddGroup()
     {
         var group = new NodeGroup("ValueAdd Group");
         var runtime = group.AddRuntime<R>();
@@ -66,7 +65,7 @@ public sealed class Test1
         return group;
     }
 
-    static NodeGroup BibleMarkGroup()
+    public static NodeGroup BibleMarkGroup()
     {
         var group = new NodeGroup("BibleMark Group");
         var runtime = group.AddRuntime<R>();
@@ -88,7 +87,7 @@ public sealed class Test1
         var writeResult2 = runtime.AddNode<ValueWrite<ulong>>();
         var resultLocal = runtime.AddNode<LocalValue<ulong>>();
 
-        // stringInput.Value = System.IO.File.ReadAllText "bible.txt";
+        stringInput.Value = System.IO.File.ReadAllText(@"D:\bree\Downloads\bible\testdata\bible.txt");
 
         start.Target.Target = forLoop;
 

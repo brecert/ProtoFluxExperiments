@@ -23,9 +23,9 @@ public class NodeGroupCompiler
     readonly Dictionary<INode, ParameterExpression> instanceMap = [];
     readonly Dictionary<OperationElement, ParameterExpression> operationMap = [];
 
-    static T Debug<T>(T any) where T : Expression
+    static T DebugExpression<T>(T any) where T : Expression
     {
-        System.Diagnostics.Debug.WriteLine(ExpressionToCode.ToCode(any));
+        // System.Diagnostics.Debug.WriteLine(ExpressionToCode.ToCode(any));
         return any;
     }
 
@@ -40,7 +40,7 @@ public class NodeGroupCompiler
     }
 
     public static Action<Action<Core.INode, Core.INode>> Compile(NodeGroup nodeGroup) =>
-        Debug(new NodeGroupCompiler(nodeGroup).Compile()).Compile();
+        DebugExpression(new NodeGroupCompiler(nodeGroup).Compile()).Compile();
 
     Expression<Action<Action<Core.INode, Core.INode>>> Compile()
     {
@@ -88,9 +88,14 @@ public class NodeGroupCompiler
                 var name = ProtoFluxName(intoField);
                 var fromField = node.GetType().GetField(name)
                     ?? throw new Exception($"Invalid ProtoFlux constant field mapping for '{name}'");
+
+                Debug.WriteLine(fromField);
                 Assign(
                     Expression.MakeMemberAccess(variable, intoField),
-                    Expression.Constant(fromField.GetValue(node))
+                    // Expression.Coalesce(
+                        Expression.Constant(fromField.GetValue(node), fromField.FieldType)
+                        // Expression.Default(fromField.FieldType)
+                    // )
                 );
                 // WriteLine(Expression.MakeMemberAccess(variable, intoField));
                 // WriteLine(Expression.Constant(fromField.GetValue(node)));
@@ -131,31 +136,35 @@ public class NodeGroupCompiler
                 Lambda<Action>(fun =>
                 {
                     BuildSequence(sequence, outputMap);
-                    
+
                     // Finally we "jump" to the next operation by calling the operation
                     var node = instanceMap[operation.OwnerNode];
                     var operationMember = GetOperationByName(node.Type, operation.DisplayName);
-                    var parameters = MapInputParameters(operation, outputMap, node, operationMember);
+                    var parameters = MapInputParameters(operation.OwnerNode, operationMember, outputMap);
                     Call(node, operationMember, parameters);
                 })
             );
         }
+    }
 
-        static IEnumerable<Expression> MapInputParameters(OperationElement operation, Dictionary<OutputElement, Expression> outputMap, ParameterExpression node, MethodInfo operationMember)
+    static IEnumerable<Expression> MapInputParameters(INode ownerNode, MethodInfo operationMember, Dictionary<OutputElement, Expression> outputMap)
+    {
+        foreach (var parameterInfo in operationMember.GetParameters())
         {
-            foreach (var parameterInfo in operationMember.GetParameters())
+            var name = ProtoFluxName(parameterInfo)
+                ?? throw new Exception($"No input name found for input on {ownerNode}");
+
+            var inputElement = ownerNode.GetInputElementByName(name)
+                ?? throw new Exception($"No input element found for name '{name}' on '{ownerNode}'");
+
+            if (inputElement.SourceElement() is var sourceOutput and not null)
             {
-                var name = ProtoFluxName(parameterInfo) ?? throw new Exception($"No input name found for input on {node}");
-                var inputElement = operation.OwnerNode.GetInputElementByName(name);
-                if (inputElement?.SourceElement() is var sourceOutput and not null)
-                {
-                    var outputVarExpr = outputMap[sourceOutput];
-                    yield return outputVarExpr;
-                }
-                else
-                {
-                    throw new Exception("default inputs are not supported yet");
-                }
+                var outputVarExpr = outputMap[sourceOutput];
+                yield return outputVarExpr;
+            }
+            else
+            {
+                yield return Expression.Default(inputElement.ValueType);
             }
         }
     }
@@ -173,18 +182,18 @@ public class NodeGroupCompiler
 
             // TODO: get outputs by attribute
             var owner = instanceMap[output.OwnerNode];
-            var method = GetMethodByName(owner.Type, output.DisplayName);
 
-            // TODO: use attributes/metadata for Default
-            var inputs = output.OwnerNode.AllInputElements()
-                .Select(i => i.SourceElement() is var el and not null ? outputMap[el] : Expression.Default(i.ValueType));
+            var outputMethod = GetOutputByName(owner.Type, output.DisplayName)
+                ?? throw new Exception($"unable to find output '{output.DisplayName}' by name for '{output.OwnerNode}'");
 
-            var variable = DeclareVariable(method.ReturnType, $"o{i}");
+            var inputs = MapInputParameters(output.OwnerNode, outputMethod, outputMap);
+
+            var variable = DeclareVariable(outputMethod.ReturnType, $"o{i}");
             outputMap[output] = variable;
 
             Assign(
                 variable,
-                Expression.Call(owner, method, inputs)
+                Expression.Call(owner, outputMethod, inputs)
             );
         }
     }
@@ -219,12 +228,18 @@ public class NodeGroupCompiler
             .FirstOrDefault(m => (m.GetCustomAttribute<ProtoFluxNameAttribute>()?.Name ?? m.Name) == name)
             ?? throw new Exception($"Unable to find method '{name}' by name for '{type}'");
 
+    static MethodInfo GetOutputByName(Type type, string name) =>
+        type.GetMethods()
+            .Where(m => m.GetCustomAttribute<OutputAttribute>() != null)
+            .FirstOrDefault(m => ProtoFluxName(m) == name)
+            ?? throw new Exception($"Unable to find output '{name}' by name for '{type}'");
+
+
     static MethodInfo GetOperationByName(Type type, string name) =>
         type.GetMethods()
             .Where(m => m.GetCustomAttribute<OperationAttribute>() != null)
             .FirstOrDefault(m => ProtoFluxName(m) == name)
             ?? throw new Exception($"Unable to find operation '{name}' by name for '{type}'");
-
 
     static string ProtoFluxName(MemberInfo info) =>
         info.GetCustomAttribute<ProtoFluxNameAttribute>()?.Name ?? info.Name;

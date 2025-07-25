@@ -10,6 +10,7 @@ public sealed class LocalValue<T> : INode, IVariable<T> where T : unmanaged
     private T value = default;
 
     [Output]
+    [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Value() => value;
 

@@ -41,7 +41,10 @@ public sealed class BibleMarkTesting
         {
             value = 1099511628211UL
         };
-        var n3 = new ObjectConstant<string>(input);
+        var n3 = new ObjectConstant<string>
+        {
+            value = input
+        };
         var n4 = new StringLength();
         var n5 = new For();
         var n6 = new GetCharacter();
@@ -82,10 +85,10 @@ public sealed class BibleMarkTesting
         void b3()
         {
             var v0 = n3.Value();
-            var v1 = n5.Index();
+            var v1 = n5.Iteration();
             var v2 = n6.Value(v0, v1);
             var v3 = n7.Value(v2);
-            var v4 = n9.Value(v3);
+            var v4 = Cast_int_To_ulong.Value(v3);
             var v5 = n14.Value();
             var v6 = n10.Value(v5, v4);
             n13.Run(v6);
