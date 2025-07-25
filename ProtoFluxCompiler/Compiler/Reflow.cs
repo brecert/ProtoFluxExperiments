@@ -1,30 +1,26 @@
-using System.Collections;
-using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Text;
 using Elements.Core;
-using HarmonyLib;
 using ProtoFlux.Core;
-using ProtoFlux.Runtimes.Execution;
-using ProtoFlux.Runtimes.Execution.Nodes;
-using ProtoFlux.Runtimes.Execution.Nodes.Operators;
-using ProtoFluxCompiler.Collections;
+using ProtoFluxCompiler.Collections.Generic;
 using ProtoFluxUtils.Elements;
 using ProtoFluxUtils.Extensions;
-using ExecutionContext = ProtoFlux.Runtimes.Execution.ExecutionContext;
 
 namespace ProtoFluxCompiler.Compiler;
 
+/// <summary>
+/// Provides methods for working with and converting node groups into ordered sequences.
+/// </summary>
 public static class Reflow
 {
     /// <summary>
-    /// Builds a linear sequence of outputs from the node's inputs
-    /// (c = a + b; d = a + c;) -> [a; b; c; d]
+    /// Builds a linear sequence of outputs.
     /// </summary>
-    /// <typeparam name="C"></typeparam>
-    /// <param name="node"></param>
-    /// <param name="set"></param>
-    public static void BuildSequence(INode node, in OrderedPushSet<OutputElement> set)
+    /// <param name="node">The node to build a sequence from.</param>
+    /// <param name="set">The collection of already seen elements, ordered by .</param>
+    /// <remarks>
+    /// The order
+    /// </remarks>
+    internal static void BuildSequence(INode node, in OrderedPushSet<OutputElement> set)
     {
         foreach (var input in node.AllInputElements())
         {
@@ -36,12 +32,11 @@ public static class Reflow
 
 
     /// <summary>
-    /// Builds a linear sequence of outputs that feed into this output
+    /// Builds a linear sequence of outputs that feed into this output.
     /// </summary>
-    /// <typeparam name="C"></typeparam>
     /// <param name="outputElement"></param>
     /// <param name="set"></param>
-    public static void BuildSequence(OutputElement outputElement, in OrderedPushSet<OutputElement> set)
+    internal static void BuildSequence(OutputElement outputElement, in OrderedPushSet<OutputElement> set)
     {
         set.Add(outputElement);
         foreach (var output in outputElement.OwnerNode.AllInputElements())

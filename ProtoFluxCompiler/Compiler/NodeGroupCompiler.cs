@@ -2,11 +2,10 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using DotNext.Linq.Expressions;
-using DotNext.Threading;
-using ExpressionToCodeLib;
+using FastExpressionCompiler;
 using ProtoFlux.Core;
-using ProtoFlux.Runtimes.Execution.Nodes.Operators;
 using ProtoFluxCompiler.Attributes;
+using ProtoFluxCompiler.Collections.Generic;
 using ProtoFluxUtils.Elements;
 using ProtoFluxUtils.Extensions;
 using static DotNext.Metaprogramming.CodeGenerator;
@@ -40,24 +39,10 @@ public class NodeGroupCompiler
     }
 
     public static Action<Action<Core.INode, Core.INode>> Compile(NodeGroup nodeGroup) =>
-        DebugExpression(new NodeGroupCompiler(nodeGroup).Compile()).Compile();
+        DebugExpression(new NodeGroupCompiler(nodeGroup).Compile()).CompileFast();
 
     Expression<Action<Action<Core.INode, Core.INode>>> Compile()
     {
-        // var instances = CreateInstances();
-        // var references = AssignReferences();
-        // var blocks = CreateBlocks();
-        // var impulses = AssignImpulses();
-
-        // // var combined = Expression.Block([
-        // //     ..instances,
-        // //     // ..references,
-        // //     // ..blocks,
-        // //     // ..impulses
-        // // ]);
-
-        // return Expression.Lambda(combined);
-
         return Lambda<Action<Action<Core.INode, Core.INode>>>(fun =>
         {
             CreateInstances();
@@ -169,7 +154,7 @@ public class NodeGroupCompiler
         }
     }
 
-    private void BuildSequence(Collections.OrderedPushSet<OutputElement> sequence, Dictionary<OutputElement, Expression> outputMap)
+    private void BuildSequence(OrderedPushSet<OutputElement> sequence, Dictionary<OutputElement, Expression> outputMap)
     {
         // var outputMap = new Dictionary<OutputElement, Expression>();
 

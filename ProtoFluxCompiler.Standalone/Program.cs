@@ -28,33 +28,27 @@ var text = File.ReadAllText(@"D:\bree\Code\local\Resonite\BreeFluxTesting\bible.
 // bench();
 
 var group = Test1.BibleMarkGroup();
-var compile = NodeGroupCompiler.Compile(group);
 ExternalCall<C>? call = null;
+var getValues = NodeGroupCompiler.Compile(group);
+getValues((a, b) => { call = (ExternalCall<C>)a; });
 
-compile((a, b) =>
-{
-    var A = (ExternalCall<C>)a;
-    var B = (LocalValue<ulong>)b;
-    call = A;
-});
+bench();
+bench();
+bench();
+bench();
+bench();
+bench();
+bench();
+bench();
+bench();
+bench();
+bench();
+bench();
+bench();
+bench();
+bench();
 
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-bench(call!);
-
-void bench(ExternalCall<C> call)
+void bench()
 {
     var sw = new Stopwatch();
     sw.Start();
