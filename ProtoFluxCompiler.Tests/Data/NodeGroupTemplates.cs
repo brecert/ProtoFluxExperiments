@@ -12,19 +12,19 @@ namespace ProtoFluxCompiler.Tests.Data;
 
 public static class NodeGroupTemplates
 {
-    public static NodeGroup ValueAddGroup()
+    public static NodeGroup ValueAddGroup<T>(T add1, T add2) where T : unmanaged
     {
         var group = new NodeGroup("ValueAdd Group");
         var runtime = group.AddRuntime<R>();
 
         var call = runtime.AddNode<ExternalCall<C>>();
-        var a = runtime.AddNode<ValueConstant<int>>();
-        var b = runtime.AddNode<ValueConstant<int>>();
-        var add = runtime.AddNode<ValueAdd<int>>();
-        var write = runtime.AddNode<ValueWrite<int>>();
-        var store = runtime.AddNode<LocalValue<int>>();
-        a.Value = 3;
-        b.Value = 4;
+        var a = runtime.AddNode<ValueConstant<T>>();
+        var b = runtime.AddNode<ValueConstant<T>>();
+        var add = runtime.AddNode<ValueAdd<T>>();
+        var write = runtime.AddNode<ValueWrite<T>>();
+        var store = runtime.AddNode<LocalValue<T>>();
+        a.Value = add1;
+        b.Value = add2;
 
         call.Target.Target = write;
         add.A.Source = a;

@@ -22,12 +22,6 @@ public class NodeGroupCompiler
     readonly Dictionary<INode, ParameterExpression> instanceMap = [];
     readonly Dictionary<OperationElement, ParameterExpression> operationMap = [];
 
-    static T DebugExpression<T>(T any) where T : Expression
-    {
-        // System.Diagnostics.Debug.WriteLine(ExpressionToCode.ToCode(any));
-        return any;
-    }
-
     NodeGroupCompiler(NodeGroup nodeGroup)
     {
         var nodes = new INode[nodeGroup.TotalNodeCount];
@@ -38,22 +32,40 @@ public class NodeGroupCompiler
         this.nodeGroup = nodeGroup;
     }
 
-    public static Action<Action<Core.INode, Core.INode>> Compile(NodeGroup nodeGroup) =>
-        DebugExpression(new NodeGroupCompiler(nodeGroup).Compile()).CompileFast();
+    #region Testing
+    // TODO: Rename?
+    // TODO: There's a bug on my side or fast compile when returning values here, skip for now and focus on finishing everything else first.
+    public static Func<Core.INode[]> CompileForTesting(NodeGroup nodeGroup) =>
+        new NodeGroupCompiler(nodeGroup).CompileForTesting().Compile();
 
-    Expression<Action<Action<Core.INode, Core.INode>>> Compile()
+    Expression<Func<Core.INode[]>> CompileForTesting()
     {
-        return Lambda<Action<Action<Core.INode, Core.INode>>>(fun =>
+        return CompileGroup<Func<Core.INode[]>>(fun =>
+        {
+            Return(Expression.NewArrayInit(typeof(Core.INode), instanceMap.Values));
+        });
+    }
+    #endregion
+
+
+    public static Action Compile(NodeGroup nodeGroup) =>
+        new NodeGroupCompiler(nodeGroup).Compile().CompileFast();
+
+    Expression<Action> Compile() =>
+        CompileGroup<Action>();
+
+    Expression<T> CompileGroup<T>(Action<DotNext.Metaprogramming.LambdaContext>? body = null) where T : Delegate
+    {
+        return Lambda<T>(fun =>
         {
             CreateInstances();
             AssignReferences();
             CreateBlocks();
             AssignImpulses();
 
-            Invoke(fun[0], [instanceMap.First().Value, instanceMap.Last().Value]);
+            body?.Invoke(fun);
         });
     }
-
 
     void CreateInstances()
     {
@@ -77,13 +89,8 @@ public class NodeGroupCompiler
                 Debug.WriteLine(fromField);
                 Assign(
                     Expression.MakeMemberAccess(variable, intoField),
-                    // Expression.Coalesce(
-                        Expression.Constant(fromField.GetValue(node), fromField.FieldType)
-                        // Expression.Default(fromField.FieldType)
-                    // )
+                    Expression.Constant(fromField.GetValue(node), fromField.FieldType)
                 );
-                // WriteLine(Expression.MakeMemberAccess(variable, intoField));
-                // WriteLine(Expression.Constant(fromField.GetValue(node)));
             }
         }
     }
