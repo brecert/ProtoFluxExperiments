@@ -1,19 +1,21 @@
 using System.Runtime.CompilerServices;
-using Elements.Core;
 using ProtoFluxCompiler.Attributes;
 using ProtoFluxCompiler.Core;
 
 namespace ProtoFluxCompiler.Nodes;
 
 [Node]
-public sealed class ValueAdd<T> : INode where T : unmanaged
+public sealed class GetCharacter : INode
 {
     [Output]
     [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T Value(
-        [Input] T A,
-        [Input] T B
-    ) => Coder<T>.Add(A, B);
+    public char Value(
+        [Input] string? Str,
+        [Input] int Index
+    ) =>
+        Str is not null && Index >= 0 && Index < Str.Length
+            ? Str[Index]
+            : '\0';
 }
 

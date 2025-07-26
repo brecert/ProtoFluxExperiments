@@ -6,14 +6,14 @@ using ProtoFluxCompiler.Core;
 namespace ProtoFluxCompiler.Nodes;
 
 [Node]
-public sealed class ValueAdd<T> : INode where T : unmanaged
+public sealed class Unpack_Int2 : INode
 {
     [Output]
-    [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T Value(
-        [Input] T A,
-        [Input] T B
-    ) => Coder<T>.Add(A, B);
+    public int X([Input] int2 V) => V.x;
+
+    [Output]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int Y([Input] int2 V) => V.y;
 }
 
