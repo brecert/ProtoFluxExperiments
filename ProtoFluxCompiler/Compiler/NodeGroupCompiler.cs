@@ -225,7 +225,7 @@ public class NodeGroupCompiler
     static MemberInfo GetMemberByName(Type type, string name) =>
         type.GetMembers()
             .FirstOrDefault(m => (m.GetCustomAttribute<ProtoFluxNameAttribute>()?.Name ?? m.Name) == name)
-            ?? throw new Exception($"Unable to find method '{name}' by name for '{type}'");
+            ?? throw new Exception($"Unable to find member '{name}' by name for '{type}'");
 
     static MethodInfo GetOutputByName(Type type, string name) =>
         type.GetMethods()
