@@ -2,15 +2,15 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxUtils.Elements;
 
-public readonly struct ImpulseElement(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
+public record ImpulseElement(INode Node, int ElementIndex, int? ElementListIndex = null) : IElementIndex
 {
-  public readonly INode OwnerNode = node;
+  public readonly INode OwnerNode = Node;
 
-  public readonly int ElementIndex = elementIndex;
+  public readonly int ElementIndex = ElementIndex;
 
-  public readonly int? ElementListIndex = elementListIndex;
+  public readonly int? ElementListIndex = ElementListIndex;
 
-  public readonly IOperation? Target
+  public IOperation? Target
   {
     get => GetImpulseTarget();
     set => SetImpulseTarget(value);
@@ -47,12 +47,12 @@ public readonly struct ImpulseElement(INode node, int elementIndex, int? element
     }
   }
 
-  public readonly string DisplayName =>
+  public string DisplayName =>
     ElementListIndex is int listIndex
       ? $"{OwnerNode.GetImpulseListName(listIndex)}[{ElementIndex}]"
       : OwnerNode.GetImpulseName(ElementIndex);
 
-  public readonly ImpulseType TargetType => OwnerNode.GetImpulseType(ElementIndex);
+  public ImpulseType TargetType => OwnerNode.GetImpulseType(ElementIndex);
 
   int IElementIndex.ElementIndex => ElementIndex;
 

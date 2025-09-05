@@ -2,24 +2,24 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxUtils.Elements;
 
-public readonly struct ReferenceElement(INode node, int index, int? elementListIndex = null) : IElementIndex
+public record ReferenceElement(INode Node, int ElementIndex, int? ElementListIndex = null) : IElementIndex
 {
-  public readonly INode OwnerNode = node;
-  public readonly int ElementIndex = index;
-  public readonly int? ElementListIndex = elementListIndex;
+  public readonly INode OwnerNode = Node;
+  public readonly int ElementIndex = ElementIndex;
+  public readonly int? ElementListIndex = ElementListIndex;
 
-  public readonly INode? Target
+  public INode? Target
   {
     get => OwnerNode.GetReferenceTarget(ElementIndex);
     set => OwnerNode.SetReferenceTarget(ElementIndex, value);
   }
 
-  public readonly string DisplayName =>
+  public string DisplayName =>
     ElementListIndex is int listIndex
       ? throw new NotImplementedException()
       : OwnerNode.GetReferenceName(ElementIndex);
 
-  public readonly Type TargetType => OwnerNode.GetReferenceType(ElementIndex);
+  public Type TargetType => OwnerNode.GetReferenceType(ElementIndex);
 
   int IElementIndex.ElementIndex => ElementIndex;
 

@@ -2,13 +2,13 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxUtils.Elements;
 
-public record OperationElement(INode node, int elementIndex, int? elementListIndex = null) : IElementIndex
+public record OperationElement(INode Node, int ElementIndex, int? ElementListIndex = null) : IElementIndex
 {
-  public readonly INode OwnerNode = node;
+  public readonly INode OwnerNode = Node;
 
-  public readonly int ElementIndex = elementIndex;
+  public readonly int ElementIndex = ElementIndex;
 
-  public readonly int? ElementListIndex = elementListIndex;
+  public readonly int? ElementListIndex = ElementListIndex;
 
   public IOperation? Target
   {

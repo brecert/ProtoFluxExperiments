@@ -2,13 +2,20 @@ using ProtoFlux.Core;
 
 namespace ProtoFluxUtils.Elements;
 
-public record InputElement(INode OwnerNode, int ElementIndex, int? ElementListIndex = null) : IElementIndex
+public record InputElement(INode Node, int ElementIndex, int? ElementListIndex = null) : IElementIndex
 {
+  public readonly INode OwnerNode = Node;
+
+  public readonly int ElementIndex = ElementIndex;
+
+  public readonly int? ElementListIndex = ElementListIndex;
+
+
   public IOutput? Source
-  {
-    get => GetInputSource();
-    set => SetInputSource(value);
-  }
+    {
+        get => GetInputSource();
+        set => SetInputSource(value);
+    }
 
   public OutputElement? SourceElement()
   {
@@ -26,27 +33,27 @@ public record InputElement(INode OwnerNode, int ElementIndex, int? ElementListIn
 
   internal IOutput? GetInputSource() =>
       ElementListIndex is int listIndex
-        ? OwnerNode.GetInputList(listIndex).GetInputSource(ElementIndex)
-        : OwnerNode.GetInputSource(ElementIndex);
+        ? Node.GetInputList(listIndex).GetInputSource(ElementIndex)
+        : Node.GetInputSource(ElementIndex);
 
   internal void SetInputSource(IOutput? value)
   {
     if (ElementListIndex is int listIndex)
     {
-      OwnerNode.GetInputList(listIndex).SetInputSource(ElementIndex, value);
+      Node.GetInputList(listIndex).SetInputSource(ElementIndex, value);
     }
     else
     {
-      OwnerNode.SetInputSource(ElementIndex, value);
+      Node.SetInputSource(ElementIndex, value);
     }
   }
 
   public string DisplayName =>
     ElementListIndex is int listIndex
-      ? $"{OwnerNode.GetInputListName(listIndex)}[{ElementIndex}]"
-      : OwnerNode.GetInputName(ElementIndex);
+      ? $"{Node.GetInputListName(listIndex)}[{ElementIndex}]"
+      : Node.GetInputName(ElementIndex);
 
-  public Type ValueType => OwnerNode.GetInputType(ElementIndex);
+  public Type ValueType => Node.GetInputType(ElementIndex);
 
   int IElementIndex.ElementIndex => ElementIndex;
 
