@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
+using DotNext.Collections.Generic;
 using DotNext.Linq.Expressions;
+using ExpressionToCodeLib;
 using FastExpressionCompiler;
 using ProtoFlux.Core;
 using ProtoFluxCompiler.Attributes;
@@ -33,10 +35,16 @@ public class NodeGroupCompiler
     }
 
     #region Testing
+    static T Debug<T>(T any) where T : Expression
+    {
+        Console.WriteLine(any.ToCSharpString());
+        return any;
+    }
+
     // TODO: Rename?
     // TODO: There's a bug on my side or fast compile when returning values here, skip for now and focus on finishing everything else first.
     public static Func<Core.INode[]> CompileForTesting(NodeGroup nodeGroup) =>
-        new NodeGroupCompiler(nodeGroup).CompileForTesting().Compile();
+        Debug(new NodeGroupCompiler(nodeGroup).CompileForTesting()).Compile();
 
     Expression<Func<Core.INode[]>> CompileForTesting()
     {
@@ -86,7 +94,6 @@ public class NodeGroupCompiler
                 var fromField = node.GetType().GetField(name)
                     ?? throw new Exception($"Invalid ProtoFlux constant field mapping for '{name}'");
 
-                Debug.WriteLine(fromField);
                 Assign(
                     Expression.MakeMemberAccess(variable, intoField),
                     Expression.Constant(fromField.GetValue(node), fromField.FieldType)

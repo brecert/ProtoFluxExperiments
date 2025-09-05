@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using ProtoFluxCompiler.Attributes;
 using ProtoFluxCompiler.Core;
 using Impulse = System.Action;
