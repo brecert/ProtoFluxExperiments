@@ -9,12 +9,12 @@ public sealed class ObjectConstant<T> : INode
 {
     [Constant]
     [ProtoFluxName("Value")]
-    public T value;
+    public T? value;
 
     public ObjectConstant() { }
 
     [Output]
     [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T Value() => value;
+    public T? Value() => value;
 }

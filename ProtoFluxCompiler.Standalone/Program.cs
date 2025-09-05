@@ -2,7 +2,7 @@
 using ProtoFluxCompiler.Compiler;
 using ProtoFluxCompiler.Nodes;
 using ProtoFluxCompiler.Tests;
-
+using ProtoFluxCompiler.Tests.Data;
 using C = ProtoFlux.Runtimes.Execution.ExecutionContext;
 
 var text = File.ReadAllText(@"D:\bree\Code\local\Resonite\BreeFluxTesting\bible.txt");
@@ -27,10 +27,11 @@ var text = File.ReadAllText(@"D:\bree\Code\local\Resonite\BreeFluxTesting\bible.
 // bench();
 // bench();
 
-var group = Test1.BibleMarkGroup();
-ExternalCall<C>? call = null;
-var getValues = NodeGroupCompiler.Compile(group);
-getValues((a, b) => { call = (ExternalCall<C>)a; });
+var group = NodeGroupTemplates.XorHashGroup(text);
+// ExternalCall<C>? call = null;
+var getValues = NodeGroupCompiler.CompileForTesting(group);
+var call = (ExternalCall<C>)getValues().First(n => n is ExternalCall<C>);
+// getValues((a, b) => { call = (ExternalCall<C>)a; });
 
 bench();
 bench();

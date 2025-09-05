@@ -10,7 +10,7 @@ public sealed class ToUTF16 : INode
     [Output]
     [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int Value(
+    public static int Value(
         [Input] char Character
     ) => Character;
 }

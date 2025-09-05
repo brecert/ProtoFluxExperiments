@@ -10,7 +10,7 @@ public sealed class GetCharacter : INode
     [Output]
     [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public char Value(
+    public static char Value(
         [Input] string? Str,
         [Input] int Index
     ) =>

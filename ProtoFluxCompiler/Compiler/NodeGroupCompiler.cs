@@ -185,7 +185,7 @@ public class NodeGroupCompiler
 
             Assign(
                 variable,
-                Expression.Call(owner, outputMethod, inputs)
+                outputMethod.IsStatic ? Expression.Call(null, outputMethod, inputs) : Expression.Call(owner, outputMethod, inputs)
             );
         }
     }

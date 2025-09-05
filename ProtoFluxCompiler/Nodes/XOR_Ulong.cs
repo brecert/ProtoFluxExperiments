@@ -10,7 +10,7 @@ public sealed class XOR_Ulong : INode
     [Output]
     [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong Value(
+    public static ulong Value(
         [Input] ulong A,
         [Input] ulong B
     ) => A ^ B;

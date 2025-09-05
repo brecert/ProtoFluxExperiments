@@ -10,7 +10,7 @@ public sealed class StringLength : INode
     [Output]
     [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int Value(
+    public static int Value(
         [Input] string? A
     ) => A?.Length ?? 0;
 }

@@ -10,7 +10,7 @@ public sealed class Cast_int_To_ulong : INode
     [Output]
     [ProtoFluxName("*")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong Value(
+    public static ulong Value(
         [Input] int Input
     ) => (ulong)Input;
 }
