@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <RootNamespace>ProtoFluxCompiler.Tests</RootNamespace>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net9</TargetFramework>
     <LangVersion>12</LangVersion>
     <!--
     To enable the Microsoft Testing Platform 'dotnet test' experience, add property:
@@ -50,7 +50,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <ResoniteAssemblyPath>$(ResonitePath)/Resonite_Data/Managed</ResoniteAssemblyPath>
+    <ResoniteAssemblyPath>$(ResonitePath)</ResoniteAssemblyPath>
     <ReferencePath>$(ResoniteAssemblyPath);$(ReferencePath)</ReferencePath>
   </PropertyGroup>
 
