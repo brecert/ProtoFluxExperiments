@@ -1,2 +1,22 @@
 <Project>
+
+  <PropertyGroup>
+    <ResoniteAssemblyPath>$(ResonitePath)</ResoniteAssemblyPath>
+    <ReferencePath>$(ResoniteAssemblyPath);$(ReferencePath)</ReferencePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="@(ResoniteReference)">
+      <Name>%(ResoniteReference.Identity)</Name>
+      <HintPath Condition="Exists('$(ResoniteAssemblyPath)/%(Identity).dll')">$(ResoniteAssemblyPath)/%(Identity).dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="HarmonyLib">
+      <HintPath>$(ResonitePath)/rml_libs/0Harmony.dll</HintPath>
+      <HintPath Condition="Exists('$(ResonitePath)0Harmony.dll')">$(ResonitePath)/0Harmony.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

@@ -1,12 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <RootNamespace>ProtoFluxCompiler.Tests</RootNamespace>
-    <TargetFramework>net9</TargetFramework>
-    <LangVersion>12</LangVersion>
+
     <!--
     To enable the Microsoft Testing Platform 'dotnet test' experience, add property:
       <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
@@ -31,34 +28,17 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
     <PackageReference Include="xunit.v3" Version="3.0.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.2" />
-
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.7" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ProtoFluxCompiler\ProtoFluxCompiler.csproj" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <ResonitePath>D:\Program Files (x86)\Steam\steamapps\common\Resonite\</ResonitePath>
-  </PropertyGroup>
 
   <ItemGroup>
     <ResoniteReference Include="Elements.Core" />
     <ResoniteReference Include="ProtoFlux.Core" />
     <ResoniteReference Include="ProtoFlux.Nodes.Core" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <ResoniteAssemblyPath>$(ResonitePath)</ResoniteAssemblyPath>
-    <ReferencePath>$(ResoniteAssemblyPath);$(ReferencePath)</ReferencePath>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Reference Include="@(ResoniteReference)">
-      <Name>%(ResoniteReference.Identity)</Name>
-      <HintPath Condition="Exists('$(ResoniteAssemblyPath)/%(Identity).dll')">$(ResoniteAssemblyPath)/%(Identity).dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

@@ -1,10 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
@@ -13,28 +9,10 @@
     <ProjectReference Include="..\ProtoFluxCompiler.Tests\ProtoFluxCompiler.Tests.csproj" />
   </ItemGroup>
 
-  <!--  -->
-
-  <PropertyGroup>
-    <ResonitePath>D:\Program Files (x86)\Steam\steamapps\common\Resonite\</ResonitePath>
-  </PropertyGroup>
-
   <ItemGroup>
     <ResoniteReference Include="Elements.Core" />
     <ResoniteReference Include="ProtoFlux.Core" />
     <ResoniteReference Include="ProtoFlux.Nodes.Core" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <ResoniteAssemblyPath>$(ResonitePath)</ResoniteAssemblyPath>
-    <ReferencePath>$(ResoniteAssemblyPath);$(ReferencePath)</ReferencePath>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Reference Include="@(ResoniteReference)">
-      <Name>%(ResoniteReference.Identity)</Name>
-      <HintPath Condition="Exists('$(ResoniteAssemblyPath)/%(Identity).dll')">$(ResoniteAssemblyPath)/%(Identity).dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
