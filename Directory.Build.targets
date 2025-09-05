@@ -12,11 +12,13 @@
     </Reference>
   </ItemGroup>
 
+  <!--
   <ItemGroup>
     <Reference Include="HarmonyLib">
       <HintPath>$(ResonitePath)/rml_libs/0Harmony.dll</HintPath>
       <HintPath Condition="Exists('$(ResonitePath)0Harmony.dll')">$(ResonitePath)/0Harmony.dll</HintPath>
     </Reference>
   </ItemGroup>
+  -->
 
 </Project>

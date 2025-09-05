@@ -2,7 +2,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Elements.Core;
 using FrooxEngine.ProtoFlux;
-using HarmonyLib;
 using ProtoFlux.Core;
 using DotNetUtils.Extensions;
 
@@ -10,20 +9,6 @@ namespace ProtoFluxUtils.Elements;
 
 static class NodeMetadataUtilities
 {
-  // internal static IEnumerable<MenuItem> MenuItems(ProtoFluxTool __instance, IWorldElement? grabbedReference)
-  // {
-  //   if (grabbedReference == null) yield break;
-
-  //   foreach (var nodeType in NodeTypes())
-  //   {
-  //     var globalRefMeta = GlobalRefMetadata(nodeType).Where(m => !m.ValueType.IsGenericTypeDefinition).FirstOrDefault();
-  //     if (globalRefMeta != null && globalRefMeta.ValueType.IsAssignableFrom(grabbedReference.GetType()))
-  //     {
-  //       yield return new MenuItem(nodeType);
-  //     }
-  //   }
-  // }
-
   public readonly struct InputElementMetadata(int index, FieldInfo field, Type inputType)
   {
     public readonly int Index = index;
@@ -58,13 +43,11 @@ static class NodeMetadataUtilities
   }
 
   public static IEnumerable<Type> NodeTypes() =>
-    Traverse.Create(typeof(ProtoFluxHelper)).Field<Dictionary<Type, Type>>("protoFluxToBindingMapping").Value.Keys;
+    GetProtoFluxToBindingMapping().Keys;
 
-  // [HarmonyReversePatch]
-  // [HarmonyPatch(typeof(ProtoFluxHelper), "GetNodeForType")]
-  // [MethodImpl(MethodImplOptions.NoInlining)]
+  [UnsafeAccessor(UnsafeAccessorKind.StaticField, Name = "protoFluxToBindingMapping")]
+  extern static ref Dictionary<Type, Type> GetProtoFluxToBindingMapping();
+
   [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "GetNodeForType")]
   extern static Type GetNodeForType(Type type, List<NodeTypeRecord> list);
-  // internal static Type GetNodeForType(Type type, List<NodeTypeRecord> list) => throw new NotImplementedException();
-
 }
