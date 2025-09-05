@@ -32,7 +32,15 @@ var group = NodeGroupTemplates.XorHashGroup("");
 // var getValues = NodeGroupCompiler.CompileForTesting(group);
 
 
-var getValues = (Func<ProtoFluxCompiler.Core.INode[]>)(() => //INode[]
+// with just the impulses and no expressions this is 20ms
+// this must be reduced.
+// in total it's 30ms
+// 5ms of that is Coder<T>
+// if jumps can be reduced to 1-2 ms and Coder<T> can be sufficiently optimized away then 10ms is a reasonable target, and only 2.25x slower than an equivilent c implementation.
+// impulses: 20ms
+// expressions: 10ms
+// - ValueMul<T>.Mul: 5ms (at least)
+var getValues = () =>
 {
     ExternalCall<C> n0 = null;
     ValueConstant<ulong> n1 = null;
@@ -81,32 +89,37 @@ var getValues = (Func<ProtoFluxCompiler.Core.INode[]>)(() => //INode[]
     n11.Variable = n14;
     n12.Variable = n14;
     n13.Variable = n14;
-    void b0() //void
+
+    void b0()
     {
         string o0 = null;
         int o1 = default;
         o0 = n3.Value();
         o1 = StringLength.Value(o0);
+        // just running this alone without any connections is 1ms
+        // running it just connected to an empty b2 is 7ms
+        // todo: this must be addressed.
         n5.Run(o1, default);
-    };
-    void b1() //void
+    }
+
+    void b1()
     {
         ulong o0_1 = default;
         o0_1 = n2.Value();
         n11.Run(o0_1);
-    };
-    void b2()//void
+    }
+
+    void b2()
     {
         ulong o0_2 = default;
         ulong o1_1 = default;
         ulong o2 = default;
         o0_2 = n14.Value();
         o1_1 = n1.Value();
-        o2 = n8.Value(
-            o1_1,
-            o0_2);
+        o2 = n8.Value(o1_1, o0_2); // (o1_1 * o0_2) for 5ms reduction, swap Coder<T> to INumber<T> for 4ms reduction
         n12.Run(o2);
-    };
+    }
+
     void b3()
     {
         string o0_3 = null;
@@ -120,17 +133,14 @@ var getValues = (Func<ProtoFluxCompiler.Core.INode[]>)(() => //INode[]
         o0_3 = n3.Value();
         o1_2 = StringLength.Value(o0_3);
         o2_1 = n5.Iteration();
-        o3 = GetCharacter.Value(
-            o0_3,
-            o2_1);
+        o3 = GetCharacter.Value(o0_3, o2_1);
         o4 = ToUTF16.Value(o3);
         o5 = Cast_int_To_ulong.Value(o4);
         o6 = n14.Value();
-        o7 = XOR_Ulong.Value(
-            o6,
-            o5);
+        o7 = XOR_Ulong.Value(o6, o5);
         n13.Run(o7);
-    };
+    }
+
     n0.Target = b0;
     n5.LoopStart = b1;
     n5.LoopIteration = b2;
@@ -157,11 +167,10 @@ var getValues = (Func<ProtoFluxCompiler.Core.INode[]>)(() => //INode[]
         n14,
     ];
     return result;
-});
+};
 
 var call = (ExternalCall<C>)getValues().First(n => n is ExternalCall<C>);
 // getValues((a, b) => { call = (ExternalCall<C>)a; });
-
 
 bench();
 bench();
